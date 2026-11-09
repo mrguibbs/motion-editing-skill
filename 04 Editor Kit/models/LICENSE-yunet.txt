@@ -1,0 +1,1 @@
+yunet.onnx: YuNet face detector from the OpenCV Model Zoo (https://github.com/opencv/opencv_zoo/tree/main/models/face_detection_yunet), MIT License.

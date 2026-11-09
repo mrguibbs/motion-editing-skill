@@ -1,0 +1,1 @@
+logos/ real brand marks only (bring your own) · icons/ Lucide (white stroke, ISC) · fonts/ OFL, download per fonts/README.md · photos/ your real photos for covers · screens/ real page captures · sfx/ CC0 samples · music/ tracks you own

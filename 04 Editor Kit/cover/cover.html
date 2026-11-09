@@ -1,0 +1,56 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:IDBlack;src:url(../assets/fonts/InterDisplay-Black.otf)}
+@font-face{font-family:ISerif;src:url(../assets/fonts/InstrumentSerif-Italic.woff2)}
+@font-face{font-family:Anton;src:url(../assets/fonts/Anton.woff2)}
+@font-face{font-family:JBM;src:url(../assets/fonts/JBMono-Bold.woff2)}
+body{margin:0}</style></head><body><canvas id="c" width="1080" height="1920"></canvas>
+<script>
+const cv=document.getElementById("c"),x=cv.getContext("2d");
+const load=s=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.src=s;});
+function rr(X,Y,w,h,r){x.beginPath();x.roundRect(X,Y,w,h,r);}
+function hero(y0,y1){const g=x.createLinearGradient(0,y0,0,y1);g.addColorStop(0,"#FFFFFF");g.addColorStop(.55,"#DCD2FF");g.addColorStop(1,"#9A82FF");return g;}
+function bloom(X,Y,R,c){const g=x.createRadialGradient(X,Y,0,X,Y,R);g.addColorStop(0,c);g.addColorStop(1,c.replace(/[\d.]+\)$/,"0)"));x.fillStyle=g;x.fillRect(X-R,Y-R,2*R,2*R);}
+// 3D GLASS TILE (Nov 8, 2026): refracts the backdrop behind it, extruded glass wall, gloss band,
+// diagonal sheen, Fresnel rim, chromatic edge, brand-coloured floor glow. o: k (logo scale), glow (rgba), turn (skew toward centre)
+function tile(img,cx,cy,s,tilt,k=.56,o={}){
+ const glow=o.glow??"rgba(123,97,255,.8)",al=a=>glow.replace(/[\d.]+\)$/,a+")"),r=s*.26,dep=s*.1;
+ const snap=document.createElement("canvas");snap.width=1080;snap.height=1920;snap.getContext("2d").drawImage(cv,0,0);
+ x.save();x.translate(cx,cy);x.rotate(tilt);x.transform(1,o.turn??0,0,1,0,0);
+ x.save();x.shadowColor=glow;x.shadowBlur=s*.75;x.shadowOffsetY=s*.2;rr(-s/2,-s/2+dep,s,s,r);x.fillStyle="#07081a";x.fill();x.restore();   // floor glow
+ for(let i=10;i>=1;i--){const f=i/10;rr(-s/2,-s/2+dep*f,s,s,r);x.fillStyle=i>4?"#06071a":"#151845";x.fill();}                          // extruded wall
+ rr(-s/2,-s/2+dep,s,s,r);x.strokeStyle=al(.6);x.lineWidth=2;x.stroke();                                                                // lit wall edge
+ x.save();rr(-s/2,-s/2,s,s,r);x.clip();
+ const M=x.getTransform(),m=1.3,bw=s*1.6,bx=cx-bw/2,by=cy-bw/2;x.setTransform(1,0,0,1,0,0);x.filter="blur(16px) saturate(1.5) brightness(1.1)";
+ x.drawImage(snap,cx+(bx-cx)/m,cy+(by-cy)/m,bw/m,bw/m,bx,by,bw,bw);x.filter="none";x.setTransform(M);                                  // refraction
+ let g=x.createLinearGradient(0,-s/2,0,s/2);g.addColorStop(0,"rgba(42,46,104,.62)");g.addColorStop(1,"rgba(8,9,32,.84)");x.fillStyle=g;x.fillRect(-s/2,-s/2,s,s);
+ g=x.createRadialGradient(0,s*.6,0,0,s*.6,s*.75);g.addColorStop(0,al(.5));g.addColorStop(1,al(0));x.fillStyle=g;x.fillRect(-s/2,-s/2,s,s);   // inner brand glow
+ g=x.createLinearGradient(0,-s/2,0,-s*.04);g.addColorStop(0,"rgba(255,255,255,.36)");g.addColorStop(1,"rgba(255,255,255,0)");rr(-s/2+7,-s/2+7,s-14,s*.44,r*.85);x.fillStyle=g;x.fill();   // gloss
+ g=x.createLinearGradient(-s/2,-s/2,s/2,s/2);g.addColorStop(.22,"rgba(255,255,255,0)");g.addColorStop(.36,"rgba(255,255,255,.16)");g.addColorStop(.5,"rgba(255,255,255,0)");x.fillStyle=g;x.fillRect(-s/2,-s/2,s,s);   // sheen
+ x.save();x.shadowColor="rgba(232,224,255,.85)";x.shadowBlur=s*.1;rr(-s/2,-s/2,s,s,r);x.lineWidth=s*.06;x.strokeStyle="rgba(255,255,255,.16)";x.stroke();x.restore();   // Fresnel rim
+ x.restore();
+ x.save();x.globalCompositeOperation="screen";x.lineWidth=2;x.translate(-1.5,0);rr(-s/2,-s/2,s,s,r);x.strokeStyle="rgba(255,90,200,.42)";x.stroke();x.translate(3,0);rr(-s/2,-s/2,s,s,r);x.strokeStyle="rgba(90,230,255,.42)";x.stroke();x.restore();
+ g=x.createLinearGradient(-s/2,-s/2,s/2,s/2);g.addColorStop(0,"rgba(255,255,255,.95)");g.addColorStop(.45,"rgba(255,255,255,.22)");g.addColorStop(1,al(.85));rr(-s/2,-s/2,s,s,r);x.strokeStyle=g;x.lineWidth=3;x.stroke();
+ x.save();x.shadowColor=o.logoGlow??al(.9);x.shadowBlur=s*.16;const q=s*k;x.drawImage(img,-q/2,-q/2,q,q);x.restore();
+ x.restore();}
+window.make=async(cfg)=>{
+ await document.fonts.load("80px IDBlack");for(const f of["ISerif","Anton","JBM"])await document.fonts.load("40px "+f);
+ const cut=await load(cfg.cut??"cut.png"),oa=await load("../assets/logos/"+(cfg.logoL??"openai")+".svg"),cl=await load("../assets/logos/"+(cfg.logoR??"claude")+".svg");
+ let g=x.createLinearGradient(0,0,0,1920);g.addColorStop(0,"#03050C");g.addColorStop(.5,"#0A1230");g.addColorStop(1,"#02030A");x.fillStyle=g;x.fillRect(0,0,1080,1920);
+ x.strokeStyle="rgba(160,150,255,.06)";x.lineWidth=1;for(let i=0;i<=1080;i+=60){x.beginPath();x.moveTo(i+.5,0);x.lineTo(i+.5,1920);x.stroke();}for(let j=0;j<=1920;j+=60){x.beginPath();x.moveTo(0,j+.5);x.lineTo(1080,j+.5);x.stroke();}
+ bloom(540,640,820,"rgba(108,80,255,.5)");bloom(980,1500,560,"rgba(40,170,230,.16)");
+ // behind the head
+ x.textAlign="center";x.font="30px JBM";x.letterSpacing="11px";x.fillStyle="#CDBFFF";x.fillText(cfg.eb??"YOUR TOPIC",540,cfg.ebY);
+ x.font=`${cfg.big}px Anton`;x.letterSpacing="4px";x.save();x.shadowColor="rgba(140,110,255,.7)";x.shadowBlur=60;x.fillStyle=hero(cfg.bigY-cfg.big*.75,cfg.bigY);x.fillText(cfg.bigT??"TITLE",540,cfg.bigY);x.restore();
+ // tiles never cover the title: their top edge sits below the title baseline (gap cfg.tileGap, default 18 px)
+ const ty=cfg.bigY+(cfg.tileGap??18)+cfg.ts/2+cfg.ts*.1;
+ tile(oa,cfg.tl[0],ty,cfg.ts,-.1,cfg.kL??.56,{glow:cfg.glowL,turn:.05});tile(cl,cfg.tr[0],ty,cfg.ts,.1,cfg.kR??.6,{glow:cfg.glowR??"rgba(255,120,70,.8)",turn:-.05});
+ // person (full bleed), violet rim
+ const w=cfg.pw,h=cut.height*w/cut.width,X=(1080-w)/2,Y=cfg.py;
+ x.save();x.shadowColor="rgba(123,97,255,.9)";x.shadowBlur=50;x.globalAlpha=.6;x.drawImage(cut,X,Y,w,h);x.restore();
+ x.save();x.filter="brightness(.95) contrast(1.06) saturate(.9)";x.drawImage(cut,X,Y,w,h);x.restore();
+ g=x.createLinearGradient(0,cfg.fade,0,cfg.fade+360);g.addColorStop(0,"rgba(3,4,12,0)");g.addColorStop(1,"rgba(3,4,12,1)");x.fillStyle=g;x.fillRect(0,cfg.fade,1080,1920-cfg.fade);
+ // headline under the chin
+ x.font=`${cfg.h1s??88}px IDBlack`;x.letterSpacing="-3px";x.fillStyle="#F5F3FF";x.shadowColor="rgba(0,0,10,.8)";x.shadowBlur=24;x.fillText(cfg.h1??"your setup line",540,cfg.hY);
+ x.font="150px ISerif";x.letterSpacing="0px";x.shadowColor="rgba(140,110,255,.7)";x.shadowBlur=50;x.fillStyle=hero(cfg.hY+30,cfg.hY+150);x.fillText(cfg.h2??"the payoff",540,cfg.hY+140);
+ return cv.toDataURL("image/jpeg",.95);};
+</script></body></html>

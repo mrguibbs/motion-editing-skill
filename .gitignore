@@ -1,0 +1,24 @@
+# your footage, renders and per-video workspaces stay local
+01 Raw Footage/*
+!01 Raw Footage/README.md
+03 Exports/*
+!03 Exports/README.md
+04 Editor Kit/work/
+02 References & Assets/photos/*
+!02 References & Assets/photos/README.md
+02 References & Assets/music/*
+!02 References & Assets/music/README.md
+02 References & Assets/fonts/*
+!02 References & Assets/fonts/README.md
+02 References & Assets/logos/*
+!02 References & Assets/logos/README.md
+02 References & Assets/screens/*
+!02 References & Assets/screens/README.md
+02 References & Assets/style-refs/
+
+# local tooling
+__pycache__/
+node_modules/
+.env*
+.DS_Store
+.claude/settings.local.json

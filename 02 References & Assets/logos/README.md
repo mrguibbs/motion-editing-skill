@@ -1,0 +1,1 @@
+Real brand marks only (PNG or SVG), named by tool: `claude.svg`, `openai.svg`, `github.png`... Get them from the brand's press kit, [simple-icons](https://simpleicons.org) or [@lobehub/icons](https://github.com/lobehub/lobe-icons). Not shipped: they're trademarks of their owners.

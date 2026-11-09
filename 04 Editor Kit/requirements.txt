@@ -1,0 +1,8 @@
+openai-whisper
+torch
+torchvision
+numpy
+scipy
+pillow
+opencv-python
+playwright
